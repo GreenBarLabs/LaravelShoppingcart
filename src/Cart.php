@@ -191,6 +191,19 @@ class Cart
     }
 
     /**
+     * Check if a row exists in the cart.
+     *
+     * @param string $rowId
+     * @return boolean
+     */
+    public function hasRow($rowId)
+    {
+        $content = $this->getContent();
+
+        return $content->has($rowId);
+    }
+
+    /**
      * Destroy the current cart instance.
      *
      * @return void
