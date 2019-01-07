@@ -3,6 +3,8 @@
 namespace Gloudemans\Shoppingcart;
 
 use Closure;
+use Carbon\Carbon;
+
 use Illuminate\Support\Collection;
 use Illuminate\Session\SessionManager;
 use Illuminate\Database\DatabaseManager;
@@ -369,12 +371,23 @@ class Cart
              ->where('identifier', $identifier)
              ->delete();
 
-
-        $this->getConnection()->table($this->getTableName())->insert([
-            'identifier' => $identifier,
-            'instance' => $this->currentInstance(),
-            'content' => serialize($content)
-        ]);
+        $exists = $this->getConnection()->table($this->getTableName())->where('identifier', $identifier)->where('instance', $this->currentInstance())->first();
+        
+        if ($exists) {
+            $this->getConnection()->table($this->getTableName())->insert([
+                'identifier' => $identifier,
+                'instance' => $this->currentInstance(),
+                'content' => serialize($content),
+                'updated_at' => Carbon::now()->toDateTimeString(),
+            ]);
+        } else {
+            $this->getConnection()->table($this->getTableName())->insert([
+                'identifier' => $identifier,
+                'instance' => $this->currentInstance(),
+                'content' => serialize($content),
+                'created_at' => Carbon::now()->toDateTimeString(),
+            ]);
+        }
 
         $this->events->fire('cart.stored');
     }
