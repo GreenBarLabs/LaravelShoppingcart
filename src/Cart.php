@@ -364,22 +364,21 @@ class Cart
     public function store($identifier)
     {
         $content = $this->getContent();
-        
-        
-        $this->getConnection()
-             ->table($this->getTableName())
-             ->where('identifier', $identifier)
-             ->delete();
 
-        $exists = $this->getConnection()->table($this->getTableName())->where('identifier', $identifier)->where('instance', $this->currentInstance())->first();
+        $exists = $this->getConnection()
+                       ->table($this->getTableName())
+                       ->where('identifier', $identifier)
+                       ->where('instance', $this->currentInstance())
+                       ->count();
         
         if ($exists) {
-            $this->getConnection()->table($this->getTableName())->insert([
-                'identifier' => $identifier,
-                'instance' => $this->currentInstance(),
-                'content' => serialize($content),
-                'updated_at' => Carbon::now()->toDateTimeString(),
-            ]);
+            $this->getConnection()->table($this->getTableName())
+                ->where('identifier', $identifier)
+                ->where('instance', $this->currentInstance())
+                ->update([
+                    'content' => serialize($content),
+                    'updated_at' => Carbon::now()->toDateTimeString(),
+                ]);
         } else {
             $this->getConnection()->table($this->getTableName())->insert([
                 'identifier' => $identifier,
